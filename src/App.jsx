@@ -127,6 +127,17 @@ function useForm(initial) {
   return { values, set, submitted, setSubmitted, reset };
 }
 
+function useIsMobile(breakpoint = 900) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth <= breakpoint);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 /* ─────────────────────────── CONTACT FORM ─────────────────────────── */
 function ContactForm() {
   const form = useForm({ name: "", email: "", phoneCode: "+971", phone: "", message: "" });
@@ -160,6 +171,7 @@ function ContactForm() {
 
 /* ─────────────────────────── POPUP FORM ─────────────────────────── */
 function PopupForm({ onSuccess }) {
+  const isMobile = useIsMobile();
   const form = useForm({ name: "", email: "", country: "", phoneCode: "+971", phone: "", message: "" });
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -175,11 +187,11 @@ function PopupForm({ onSuccess }) {
   );
   return (
     <form className="bmp-form" onSubmit={handleSubmit}>
-      <div className="bmp-form-row">
+      <div className="bmp-form-row" style={isMobile ? { flexDirection: "column" } : undefined}>
         <input name="name" placeholder="Full Name *" required value={form.values.name} onChange={form.set} />
         <input name="email" type="email" placeholder="Email *" required value={form.values.email} onChange={form.set} />
       </div>
-      <div className="bmp-form-row">
+      <div className="bmp-form-row" style={isMobile ? { flexDirection: "column" } : undefined}>
         <input name="country" placeholder="Resident of *" required value={form.values.country} onChange={form.set} />
         <div className="bmp-phone-group">
           <select name="phoneCode" value={form.values.phoneCode} onChange={form.set} required>
@@ -197,12 +209,13 @@ function PopupForm({ onSuccess }) {
 
 /* ─────────────────────────── DOWNLOAD POPUP ─────────────────────────── */
 function DownloadPopup({ open, onClose }) {
+  const isMobile = useIsMobile();
   if (!open) return null;
   return (
     <div className="bmp-popup-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="bmp-popup-box">
         <button className="bmp-popup-close" onClick={onClose}>×</button>
-        <div className="bmp-popup-split">
+        <div className="bmp-popup-split" style={isMobile ? { flexDirection: "column" } : undefined}>
           <div className="bmp-popup-info">
             <h2>Get Information On</h2>
             <div className="bmp-info-items">
@@ -232,6 +245,7 @@ function DownloadPopup({ open, onClose }) {
 
 /* ─────────────────────────── WELCOME POPUP ─────────────────────────── */
 function WelcomePopup({ open, onClose }) {
+  const isMobile = useIsMobile();
   const form = useForm({ name: "", email: "", phoneCode: "+971", phone: "" });
   const handleSubmit = (e) => { e.preventDefault(); form.setSubmitted(true); setTimeout(onClose, 2000); };
   if (!open) return null;
@@ -239,7 +253,7 @@ function WelcomePopup({ open, onClose }) {
     <div className="bmp-popup-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="bmp-welcome-box">
         <button className="bmp-popup-close" onClick={onClose}>×</button>
-        <div className="bmp-welcome-split">
+        <div className="bmp-welcome-split" style={isMobile ? { flexDirection: "column" } : undefined}>
           <div className="bmp-welcome-img">
             <img src={IMGS.hero} alt="Binghatti Mercedes Place" />
             <div className="bmp-welcome-overlay">
@@ -343,6 +357,7 @@ export default function BinghattiApp() {
   const [lightboxIdx, setLightboxIdx] = useState(null);
   const [activeFP, setActiveFP] = useState("studio");
   const welcomeShown = useRef(false);
+  const isMobile = useIsMobile();
 
   // Welcome popup on load
   useEffect(() => {
@@ -375,6 +390,11 @@ export default function BinghattiApp() {
   ];
 
   const fp = FLOOR_PLANS[activeFP];
+
+  const mobileSectionColumn = isMobile ? { flexDirection: "column", gap: "1.5rem" } : undefined;
+  const mobileButtonsColumn = isMobile ? { flexDirection: "column", gap: "1rem", alignItems: "stretch" } : undefined;
+  const mobileCenterText = isMobile ? { textAlign: "center", alignItems: "center" } : undefined;
+  const mobileFullWidth = isMobile ? { width: "100%" } : undefined;
 
   return (
     <>
@@ -435,13 +455,13 @@ export default function BinghattiApp() {
         </div>
         <div className="bmp-hero-overlay" />
         <div className="bmp-hero-container">
-          <div className="bmp-hero-center">
+          <div className="bmp-hero-center" style={isMobile ? { padding: "2rem 1.25rem", alignItems: "center", textAlign: "center" } : undefined}>
             <div className="bmp-hero-label">✦ Dubai's First Mercedes-Benz Branded Residences ✦</div>
             <h1 className="bmp-hero-title">Binghatti Mercedes Place</h1>
             <p className="bmp-hero-subtitle">
               Where automotive excellence meets architectural mastery. Experience a life of unparalleled luxury in the heart of Meydan, Dubai.
             </p>
-            <div className="bmp-stats-compact">
+            <div className="bmp-stats-compact" style={isMobile ? { flexDirection: "column", gap: "1rem" } : undefined}>
               {[
                 { val: "40%", lbl: "On Booking" },
                 { val: "AED 800K", lbl: "Starting Price" },
@@ -453,7 +473,7 @@ export default function BinghattiApp() {
                 </div>
               ))}
             </div>
-            <div className="bmp-hero-ctas">
+            <div className="bmp-hero-ctas" style={isMobile ? { flexDirection: "column", gap: "1rem", width: "100%" } : undefined}>
               <button className="bmp-btn hero-primary" onClick={() => setDownloadOpen(true)}>
                 Register Interest
               </button>
@@ -473,7 +493,7 @@ export default function BinghattiApp() {
       <section id="overview" className="bmp-video-section">
         <div className="bmp-container">
           <h2 className="bmp-section-title centered white">Project Overview</h2>
-          <div className="bmp-video-content">
+          <div className="bmp-video-content" style={isMobile ? { flexDirection: "column" } : undefined}>
             <div className="bmp-video-text">
               <p>
                 Binghatti Mercedes Place stands as a testament to the fusion of two iconic brands — Binghatti's visionary architecture and Mercedes-Benz's timeless elegance. Located in the prestigious Meydan district, this development redefines luxury living in Dubai.
@@ -481,7 +501,7 @@ export default function BinghattiApp() {
               <p>
                 Each residence is meticulously crafted with Mercedes-Benz inspired design elements, featuring premium finishes, cutting-edge technology, and exclusive amenities that cater to the most discerning residents.
               </p>
-              <div className="bmp-cta-buttons">
+              <div className="bmp-cta-buttons" style={mobileButtonsColumn}>
                 <button className="bmp-btn" onClick={() => setDownloadOpen(true)}>
                   <DownloadSVG /> Download Brochure
                 </button>
@@ -511,7 +531,7 @@ export default function BinghattiApp() {
       <section className="bmp-branded-section">
         <div className="bmp-container">
           <h2 className="bmp-section-title left">A New Era of Branded Living</h2>
-          <div className="bmp-branded-content">
+          <div className="bmp-branded-content" style={isMobile ? { flexDirection: "column" } : undefined}>
             <div className="bmp-branded-image">
               <img src={IMGS.branded} alt="Branded Living Experience" loading="lazy" />
               <div className="bmp-img-overlay">
@@ -520,7 +540,7 @@ export default function BinghattiApp() {
             </div>
             <div className="bmp-highlights">
               <h3>Why Binghatti Mercedes Place?</h3>
-              <div className="bmp-highlights-grid">
+              <div className="bmp-highlights-grid" style={isMobile ? { display: "grid", gridTemplateColumns: "1fr", gap: "1rem" } : undefined}>
                 {[
                   { icon: "🏆", title: "Iconic Brand Partnership", desc: "The world's first Mercedes-Benz branded residential tower in Dubai." },
                   { icon: "📍", title: "Prime Meydan Location", desc: "Strategically located with excellent connectivity to Dubai's key destinations." },
@@ -536,7 +556,7 @@ export default function BinghattiApp() {
                   </div>
                 ))}
               </div>
-              <div className="bmp-cta-buttons">
+              <div className="bmp-cta-buttons" style={mobileButtonsColumn}>
                 <button className="bmp-btn" onClick={() => setDownloadOpen(true)}>
                   Get Full Details
                 </button>
@@ -556,7 +576,7 @@ export default function BinghattiApp() {
           <p className="bmp-section-subtitle centered">
             From thoughtfully designed studios to expansive three-bedroom suites — every home is a masterpiece.
           </p>
-          <div className="bmp-residences-grid">
+          <div className="bmp-residences-grid" style={isMobile ? { gridTemplateColumns: "1fr", gap: "1rem" } : undefined}>
             {RESIDENCES.map(r => (
               <div className="bmp-residence-card" key={r.title}>
                 <div className="bmp-residence-image">
@@ -584,7 +604,7 @@ export default function BinghattiApp() {
           <p className="bmp-payment-intro">
             Designed to make luxury accessible. Our straightforward payment plan allows you to secure your dream residence with ease.
           </p>
-          <div className="bmp-payment-timeline">
+          <div className="bmp-payment-timeline" style={isMobile ? { flexDirection: "column", gap: "1rem" } : undefined}>
             {[
               { step: "01", pct: "40%", title: "On Booking", desc: "Secure your unit with just 40% down payment" },
               { step: "02", pct: "20%", title: "During Construction", desc: "Spread payments during construction phase" },
@@ -627,7 +647,7 @@ export default function BinghattiApp() {
           <p className="bmp-section-subtitle centered">Explore the stunning aesthetics of Binghatti Mercedes Place</p>
         </div>
         <div className="bmp-gallery-scroll-container">
-          <div className="bmp-gallery-scroll">
+          <div className="bmp-gallery-scroll" style={isMobile ? { flexWrap: "wrap", justifyContent: "center", gap: "0.75rem" } : undefined}>
             {GALLERY_IMGS.map((img, i) => (
               <div
                 className="bmp-gallery-item"
@@ -651,7 +671,7 @@ export default function BinghattiApp() {
           <p className="bmp-section-subtitle centered">
             Every amenity curated for a life of comfort, wellness, and indulgence.
           </p>
-          <div className="bmp-amenities-grid">
+          <div className="bmp-amenities-grid" style={isMobile ? { gridTemplateColumns: "repeat(2, 1fr)", gap: "1rem" } : undefined}>
             {AMENITIES.map(a => (
               <div className="bmp-amenity-card" key={a.name}>
                 <div className="bmp-amenity-icon">{a.icon}</div>
@@ -671,7 +691,7 @@ export default function BinghattiApp() {
       <section id="location" className="bmp-location-section">
         <div className="bmp-container">
           <h2 className="bmp-section-title centered">Prime Location</h2>
-          <div className="bmp-location-content">
+          <div className="bmp-location-content" style={isMobile ? { flexDirection: "column" } : undefined}>
             <div className="bmp-location-map">
               <iframe
                 title="Binghatti Mercedes Place Location"
@@ -715,7 +735,7 @@ export default function BinghattiApp() {
               </button>
             ))}
           </div>
-          <div className="bmp-fp-display">
+          <div className="bmp-fp-display" style={isMobile ? { flexDirection: "column" } : undefined}>
             <div className="bmp-fp-map">
               <img src={fp.img} alt={fp.title} loading="lazy" />
             </div>
@@ -761,7 +781,7 @@ export default function BinghattiApp() {
           <p className="bmp-contact-intro">
             Ready to make Binghatti Mercedes Place your new home? Our team is here to assist you every step of the way.
           </p>
-          <div className="bmp-contact-content">
+          <div className="bmp-contact-content" style={isMobile ? { flexDirection: "column" } : undefined}>
             <div>
               <div className="bmp-contact-info">
                 <div className="bmp-contact-card">
@@ -800,7 +820,7 @@ export default function BinghattiApp() {
       {/* ── FOOTER ── */}
       <footer className="bmp-footer">
         <div className="bmp-container">
-          <div className="bmp-footer-content">
+          <div className="bmp-footer-content" style={isMobile ? { flexDirection: "column", gap: "1.5rem", alignItems: "center", textAlign: "center" } : undefined}>
             <div className="bmp-footer-brand">
               <img src={IMGS.logo} alt="Binghatti Mercedes Place" style={{ height: 48, width: "auto", marginBottom: "1rem" }} />
               <p>Experience the fusion of automotive excellence and architectural brilliance in Dubai's most prestigious address.</p>
@@ -810,7 +830,7 @@ export default function BinghattiApp() {
                 <p>📍 Meydan, Dubai, UAE</p>
               </div>
             </div>
-            <div className="bmp-footer-links">
+            <div className="bmp-footer-links" style={isMobile ? { flexDirection: "column", gap: "1.5rem" } : undefined}>
               <div className="bmp-footer-col">
                 <h4>Quick Links</h4>
                 <ul>
